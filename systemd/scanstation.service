@@ -1,0 +1,21 @@
+[Unit]
+Description=Scan station: ScanSnap S1500 to Paperless
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=scanstation
+Group=scanstation
+SupplementaryGroups=scanner lp plugdev
+EnvironmentFile=/etc/scanstation/scanstation.env
+Environment=PYTHONPATH=/opt/scanstation
+Environment=STATE_DIR=/var/lib/scanstation
+Environment=SANE_CONFIG_DIR=/etc/scanstation/sane.d
+StateDirectory=scanstation
+WorkingDirectory=/opt/scanstation
+ExecStart=/usr/bin/python3 -m scanstation.service
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="t">
+  <title id="t">scanstation</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f6f78"/>
+      <stop offset="1" stop-color="#173f5f"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd166" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#ffd166" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#ffd166" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="sheet">
+      <path d="M78 34h74l28 28v124H78z"/>
+    </clipPath>
+  </defs>
+
+  <!-- badge, so the mark reads the same on light and dark pages -->
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+
+  <!-- the sheet, feeding down -->
+  <g>
+    <path d="M78 34h74l28 28v124H78z" fill="#ffffff"/>
+    <path d="M152 34v28h28" fill="#d9e6ea"/>
+    <g clip-path="url(#sheet)" stroke="#9fb7bf" stroke-width="7" stroke-linecap="round">
+      <line x1="96" y1="76" x2="140" y2="76"/>
+      <line x1="96" y1="96" x2="162" y2="96"/>
+      <line x1="96" y1="138" x2="162" y2="138"/>
+      <line x1="96" y1="158" x2="150" y2="158"/>
+    </g>
+    <!-- the scan line -->
+    <rect x="60" y="104" width="136" height="26" fill="url(#beam)"/>
+    <line x1="64" y1="117" x2="192" y2="117" stroke="#ffb703" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- the tray it lands in -->
+  <path d="M52 176h152l-14 40H66z" fill="#0f2b40"/>
+  <path d="M52 176h152" stroke="#8ecae6" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- safe to shred -->
+  <circle cx="190" cy="194" r="26" fill="#2a9d8f" stroke="#ffffff" stroke-width="6"/>
+  <path d="M178 194l9 9 16-18" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

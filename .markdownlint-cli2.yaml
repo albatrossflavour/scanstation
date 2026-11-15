@@ -1,0 +1,19 @@
+# Markdown rules for this repo.
+config:
+  # Prose isn't wrapped, and a table row can't be.
+  MD013: false
+  # Blank-line rules around headings and consecutive blanks are cosmetic.
+  MD012: false
+  MD022: false
+  # Table pipe padding isn't worth a failing run.
+  MD060: false
+  # Bare URLs are fine.
+  MD034: false
+  # Inline HTML centres the README header.
+  MD033: false
+  MD036: false
+  MD024: false
+  MD041: false
+ignores:
+  - "docs/superpowers/**"
+  - ".superpowers/**"

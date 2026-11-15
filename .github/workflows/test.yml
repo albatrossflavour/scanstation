@@ -1,0 +1,21 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Debian packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq python3-numpy python3-pil tesseract-ocr tesseract-ocr-osd shellcheck
+      - name: Unit tests
+        run: /usr/bin/python3 -m unittest discover -v
+      - name: Shellcheck
+        run: shellcheck setup.sh
+      - name: Markdown
+        run: npx --yes markdownlint-cli2@0.23.2 "**/*.md"
