@@ -183,6 +183,17 @@ class StartupTest(unittest.TestCase):
         self.assertEqual(lookup_gpt_tag(P(PaperlessRejected("HTTP 401"))), -1)
         self.assertEqual(lookup_gpt_tag(P(PaperlessDown("down"))), -1)
 
+    def test_blank_gpt_tag_means_no_wait(self):
+        from scanstation.service import gpt_tag_name, lookup_gpt_tag
+
+        class P:
+            def tag_id(self, name):
+                raise AssertionError("looked up a tag that was switched off")
+        self.assertEqual(lookup_gpt_tag(P(), ""), -1)
+        self.assertEqual(gpt_tag_name({}), "paperless-gpt-auto")
+        self.assertEqual(gpt_tag_name({"GPT_TAG": ""}), "")
+        self.assertEqual(gpt_tag_name({"GPT_TAG": "gpt-todo"}), "gpt-todo")
+
 
 class ScannerWrapperTest(unittest.TestCase):
     def test_scanner_closed_at_startup_and_reopened(self):

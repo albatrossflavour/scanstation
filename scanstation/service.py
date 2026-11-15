@@ -203,9 +203,16 @@ class _Scanner:
         return scan_mod.scan(outdir, self.device, thickness_check=thickness_check)
 
 
+def gpt_tag_name(env):
+    """GPT_TAG, defaulting to paperless-gpt's own tag when unset. Set but blank switches the wait off."""
+    return env.get("GPT_TAG", "paperless-gpt-auto")
+
+
 def lookup_gpt_tag(paperless, name="paperless-gpt-auto"):
     """The id of the tag paperless-gpt removes when it's done, or -1 for no wait. Never raises: scanning
     must start even if Paperless won't talk."""
+    if not name:
+        return -1
     try:
         return paperless.tag_id(name) or -1
     except (PaperlessDown, PaperlessRejected) as e:
@@ -224,7 +231,7 @@ def main():
                       failsafe_name=(env.get("FAILSAFE_NAME") or "the failsafe share") if failsafe_dir else None)
     failsafe = Failsafe(failsafe_dir)
     spool = Spool(state / "spool")
-    gpt_tag = lookup_gpt_tag(paperless, env.get("GPT_TAG") or "paperless-gpt-auto")
+    gpt_tag = lookup_gpt_tag(paperless, gpt_tag_name(env))
     step = lambda doc, now: worker_step(doc, paperless=paperless, spool=spool, notify=notify,
                                         failsafe=failsafe, now=now, gpt_tag=gpt_tag)
     scanner = _Scanner(on_ready=lambda: notify("ready", None))

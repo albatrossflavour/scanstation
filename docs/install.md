@@ -20,7 +20,7 @@ Setup asks for each setting in turn. Where you already have a value it shows it 
 
 1. The Paperless URL, as the Pi reaches it. For example `http://paperless.lan:8000`.
 2. A different URL for links in messages, if your phone reaches Paperless by another name. Leave it blank otherwise.
-3. The paperless-gpt tag. The default is `paperless-gpt-auto`. If that tag doesn't exist in Paperless the station doesn't wait for it, so leave the default if you don't run paperless-gpt.
+3. The paperless-gpt tag. The default is `paperless-gpt-auto`. If that tag doesn't exist in Paperless the station doesn't wait for it, so leave the default if you don't run paperless-gpt. Type `-` to switch the wait off altogether.
 4. Whether to create the station's Paperless user now. See below.
 5. The station's API token. If setup just created the user, the token is already filled in.
 

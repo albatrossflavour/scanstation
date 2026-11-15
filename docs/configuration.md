@@ -1,6 +1,6 @@
 # Configuration
 
-Everything site-specific lives in `/etc/scanstation/scanstation.env`, owned by root with mode 600, because it holds tokens. `setup.sh` writes it and the systemd unit reads it. You can edit it by hand and run `sudo systemctl restart scanstation`, but re-running setup checks the values for you.
+Everything site-specific lives in `/etc/scanstation/scanstation.env`, owned by root with mode 600, because it holds tokens. `setup.sh` writes it and the systemd unit reads it. You can edit it by hand and run `sudo systemctl restart scanstation`, but re-running setup checks the values for you. Setup keeps any line it doesn't ask about, so a setting you add by hand survives a re-run.
 
 Values are written single-quoted, so `$` and `\` in a token are kept as they are. A value can't contain a single quote.
 
@@ -9,7 +9,7 @@ Values are written single-quoted, so `$` and `\` in a token are kept as they are
 | `PAPERLESS_URL` | yes | | Paperless base URL as the Pi reaches it, without `/api` |
 | `PAPERLESS_TOKEN` | yes | | API token for the station's Paperless user |
 | `PAPERLESS_PUBLIC_URL` | no | `PAPERLESS_URL` | Base for the document links in messages, if your phone uses a different name |
-| `GPT_TAG` | no | `paperless-gpt-auto` | The tag paperless-gpt removes once it has titled a document. The station waits up to three minutes for it to go. If Paperless has no tag by this name, it doesn't wait |
+| `GPT_TAG` | no | `paperless-gpt-auto` | The tag paperless-gpt removes once it has titled a document. The station waits up to three minutes for it to go. Set it blank to never wait. If Paperless has no tag by this name, it doesn't wait either |
 | `PUSHOVER_TOKEN` | no | | Pushover application token |
 | `PUSHOVER_USER` | no | | Pushover user or group key. With either key blank, messages only go to the journal |
 | `FAILSAFE_NFS` | no | | NFS export, `host:/path`, that setup adds to `/etc/fstab` as an automount at `FAILSAFE_DIR` |

@@ -14,7 +14,7 @@ INTERACTIVE=1
 [[ ${1:-} == --non-interactive ]] && INTERACTIVE=0
 KEYS=(PAPERLESS_URL PAPERLESS_PUBLIC_URL PAPERLESS_TOKEN GPT_TAG PUSHOVER_TOKEN PUSHOVER_USER
       FAILSAFE_NFS FAILSAFE_DIR FAILSAFE_NAME ARCHIVE)
-declare -A CFG
+declare -A CFG SEEN
 for k in "${KEYS[@]}"; do CFG[$k]=""; done
 
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
@@ -28,15 +28,18 @@ if [[ ! -e $CONFIG && -s $OLD && $CONFIG == /etc/scanstation/scanstation.env ]];
   MIGRATED=1
   mv "$OLD" "$CONFIG"
   echo "moved $OLD to $CONFIG"
-  grep -q '^Environment=ARCHIVE_DIR=' /etc/systemd/system/scanstation.service 2>/dev/null && echo "ARCHIVE=yes" >> "$CONFIG"
+  if grep -q '^Environment=ARCHIVE_DIR=' /etc/systemd/system/scanstation.service 2>/dev/null; then
+    [[ -z $(tail -c1 "$CONFIG") ]] || echo >> "$CONFIG"   # the old file may not end in a newline
+    echo "ARCHIVE=yes" >> "$CONFIG"
+  fi
 fi
 
 if [[ -s $CONFIG ]]; then
-  while IFS= read -r line; do
+  while IFS= read -r line || [[ -n $line ]]; do
     [[ $line =~ ^([A-Z_]+)=(.*)$ ]] || continue
     key=${BASH_REMATCH[1]} val=${BASH_REMATCH[2]}
     [[ $val =~ ^\'(.*)\'$ || $val =~ ^\"(.*)\"$ ]] && val=${BASH_REMATCH[1]}
-    CFG[$key]=$val
+    CFG[$key]=$val SEEN[$key]=1
   done < "$CONFIG"
 fi
 # The environment wins, so a script can fill or change any setting.
@@ -138,14 +141,15 @@ paperless_setup() {  # create the station's Paperless user and workflow, and tak
   rm -f "$tokfile"
 }
 
-: "${CFG[GPT_TAG]:=paperless-gpt-auto}"
+# Only a new install gets the default tag: a GPT_TAG cleared on purpose stays blank (no wait).
+[[ -n ${SEEN[GPT_TAG]:-} || -n ${CFG[GPT_TAG]} ]] || CFG[GPT_TAG]=paperless-gpt-auto
 : "${CFG[ARCHIVE]:=no}"
 
 say "Paperless"
 while true; do
   ask PAPERLESS_URL "Paperless URL the Pi can reach (e.g. http://paperless.lan:8000)"
   ask PAPERLESS_PUBLIC_URL "URL for links in messages, if different (- for none)"
-  ask GPT_TAG "paperless-gpt's processing tag; the station waits for it to go (ignored if it doesn't exist)"
+  ask GPT_TAG "paperless-gpt's processing tag; the station waits for it to go (- to never wait)"
   if [[ $INTERACTIVE -eq 1 ]] && yes_no "Create or update the station's Paperless user now? Needs an admin token" \
        "$([[ -z ${CFG[PAPERLESS_TOKEN]:-} ]] && echo y || echo n)"; then
     paperless_setup
@@ -187,15 +191,22 @@ fi
 
 # --- write the config -------------------------------------------------------------------------
 
-for k in "${KEYS[@]}"; do
-  [[ ${CFG[$k]:-} == *"'"* ]] && { echo "$k can't contain a single quote" >&2; exit 1; }
+for k in "${!CFG[@]}"; do
+  [[ ${CFG[$k]} == *"'"* ]] && { echo "$k can't contain a single quote" >&2; exit 1; }
 done
 # Create the folder if it is missing, but never change the mode of an existing one.
 [[ -d $(dirname "$CONFIG") ]] || install -d -m 750 "$(dirname "$CONFIG")"
 tmp=$(mktemp "$(dirname "$CONFIG")/.scanstation.XXXXXX")
-for k in "${KEYS[@]}"; do
-  [[ -n ${CFG[$k]:-} ]] && printf "%s='%s'\n" "$k" "${CFG[$k]}"
-done > "$tmp"
+{
+  for k in "${KEYS[@]}"; do
+    # GPT_TAG is written even when blank, so a cleared tag stays cleared.
+    [[ -n ${CFG[$k]} || $k == GPT_TAG ]] && printf "%s='%s'\n" "$k" "${CFG[$k]}"
+  done
+  # Settings added by hand that setup doesn't ask about are kept as they are.
+  for k in $(printf '%s\n' "${!CFG[@]}" | sort); do
+    [[ " ${KEYS[*]} " == *" $k "* || -z ${CFG[$k]} ]] || printf "%s='%s'\n" "$k" "${CFG[$k]}"
+  done
+} > "$tmp"
 chmod 600 "$tmp"; chown root:root "$tmp"
 mv "$tmp" "$CONFIG"
 echo "settings written to $CONFIG"
