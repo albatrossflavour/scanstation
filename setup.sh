@@ -190,7 +190,8 @@ fi
 for k in "${KEYS[@]}"; do
   [[ ${CFG[$k]:-} == *"'"* ]] && { echo "$k can't contain a single quote" >&2; exit 1; }
 done
-install -d -m 750 "$(dirname "$CONFIG")"
+# Create the folder if it is missing, but never change the mode of an existing one.
+[[ -d $(dirname "$CONFIG") ]] || install -d -m 750 "$(dirname "$CONFIG")"
 tmp=$(mktemp "$(dirname "$CONFIG")/.scanstation.XXXXXX")
 for k in "${KEYS[@]}"; do
   [[ -n ${CFG[$k]:-} ]] && printf "%s='%s'\n" "$k" "${CFG[$k]}"
@@ -239,7 +240,7 @@ dir=${CFG[FAILSAFE_DIR]:-}
 [[ $PREV_DIR != "$dir" ]] && drop_automount "$PREV_DIR"
 if [[ -n ${CFG[FAILSAFE_NFS]:-} && -n $dir ]]; then
   # Mounted on first use with a short timeout, so a dead NAS can't hang a scan.
-  mountpoint -q "$dir" || install -d -m 755 "$dir"
+  [[ -d $dir ]] || install -d -m 755 "$dir"
   line="${CFG[FAILSAFE_NFS]} $dir nfs noauto,x-systemd.automount,x-systemd.mount-timeout=10s,x-systemd.idle-timeout=10min,soft,timeo=50,retrans=2,_netdev 0 0"
   if ! grep -qxF "$line" /etc/fstab; then
     drop_automount "$dir"
